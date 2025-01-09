@@ -14,7 +14,7 @@ https://docs.docker.com/desktop/setup/install/mac-install/
 
 ## Usage
 
-### <inline style="color:red">**_WARNING_**: </inline>The zipped STATE-WIDE file is >1.5GB and the unzipped Output.mdf is >9GB so be sure that your disk has plenty of free space. The total file size taken by the .mdf file and the output CSVs is >16GB.
+### <span style="color:red">**_WARNING_**: </span>The zipped STATE-WIDE file is >1.5GB and the unzipped Output.mdf is >9GB so be sure that your disk has plenty of free space. The total file size taken by the .mdf file and the output CSVs is >16GB.
 
 Download and extract Output.mdf from the zipped file found at http://ftpgeoinfo.msl.mt.gov/Data/Spatial/MSDI/Cadastral/ORION_SQLDatabases/STATE-WIDE.ZIP (see warning above.)
 
