@@ -11,20 +11,9 @@ services:
       SA_PASSWORD: "LocalPassword123!"
     ports:
       - 1433:1433
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P LocalPassword123! -Q 'SELECT 1' || exit 1",
-        ]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
     volumes:
       - ./MDF:/var/opt/mssql/backup
       - ./CSV:/var/opt/mssql/output
-      - ./init:/init
     command:
       - /bin/bash
       - -c
@@ -45,9 +34,7 @@ services:
 
         echo "Preparing Database System"
 
-        for foo in /init/*.sql
-          do /opt/mssql-tools18/bin/sqlcmd -C -U sa -P LocalPassword123! -l 30 -e -i $$foo
-        done
+        /opt/mssql-tools18/bin/sqlcmd -C -U sa -P LocalPassword123! -l 30 -e -Q "USE [master]; CREATE DATABASE [montana_cama] on (FILENAME = N'/var/opt/mssql/backup/Output.mdf') FOR ATTACH;"
 
         echo "Creating CSV Files"
 
