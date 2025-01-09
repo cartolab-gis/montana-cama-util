@@ -1,0 +1,90 @@
+version: "3.8"
+
+services:
+  mssql:
+    container_name: mssql
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "LocalPassword123!"
+    ports:
+      - 1433:1433
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P LocalPassword123! -Q 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - ./MDF:/var/opt/mssql/backup
+      - ./CSV:/var/opt/mssql/output
+      - ./init:/init
+    command:
+      - /bin/bash
+      - -c
+      - |
+
+        /opt/mssql/bin/sqlservr &
+        pid $$
+
+        echo "Waiting for SQL Server to be available"
+        /opt/mssql-tools18/bin/sqlcmd -C -l 30 -S localhost -h-1 -V1  -U sa -P LocalPassword123! -Q "SET NOCOUNT ON SELECT \"UP\" , @@servername"
+        is_up=$$?
+        while [ $$is_up -ne 0 ] ; do
+          echo -e $$(date)
+          /opt/mssql-tools18/bin/sqlcmd -C -l 30 -S localhost -h-1 -V1  -U sa -P LocalPassword123! -Q "SET NOCOUNT ON SELECT \"UP\" , @@servername"
+          is_up=$$?
+          sleep 5
+        done
+
+        echo "Preparing Database System"
+
+        for foo in /init/*.sql
+          do /opt/mssql-tools18/bin/sqlcmd -C -U sa -P LocalPassword123! -l 30 -e -i $$foo
+        done
+
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[AgForest]" | sed -e '2d' >> "/var/opt/mssql/output/ag_forest.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Appeal]" | sed -e '2d' >> "/var/opt/mssql/output/appeal.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Assessment]" | sed -e '2d' >> "/var/opt/mssql/output/assessment.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[AssessmentCA]" | sed -e '2d' >> "/var/opt/mssql/output/assessment_ca.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[AssessmentPP]" | sed -e '2d' >> "/var/opt/mssql/output/assessment_pp.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[ClassCodes]" | sed -e '2d' >> "/var/opt/mssql/output/class_codes.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Com]" | sed -e '2d' >> "/var/opt/mssql/output/com.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[ComBof]" | sed -e '2d' >> "/var/opt/mssql/output/com_bof.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[ComElev]" | sed -e '2d' >> "/var/opt/mssql/output/com_elev.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[ComIntExt]" | sed -e '2d' >> "/var/opt/mssql/output/com_int_ext.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[CondoMaster]" | sed -e '2d' >> "/var/opt/mssql/output/condo_master.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[ConservationEasement]" | sed -e '2d' >> "/var/opt/mssql/output/conservation_ease.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Deed]" | sed -e '2d' >> "/var/opt/mssql/output/deed.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Equipment]" | sed -e '2d' >> "/var/opt/mssql/output/equipment.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Exemptions]" | sed -e '2d' >> "/var/opt/mssql/output/exemptions.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Factors]" | sed -e '2d' >> "/var/opt/mssql/output/factors.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[FinalVal]" | sed -e '2d' >> "/var/opt/mssql/output/final_val.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[FlatValue]" | sed -e '2d' >> "/var/opt/mssql/output/flat_value.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[InspHistory]" | sed -e '2d' >> "/var/opt/mssql/output/insp_history.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[LinkedProperty]" | sed -e '2d' >> "/var/opt/mssql/output/linked_property.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[MarketLand]" | sed -e '2d' >> "/var/opt/mssql/output/market_land.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Oby]" | sed -e '2d' >> "/var/opt/mssql/output/oby.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[ObyMod]" | sed -e '2d' >> "/var/opt/mssql/output/oby_mod.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Owner]" | sed -e '2d' >> "/var/opt/mssql/output/owner.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[OwnerSearch]" | sed -e '2d' >> "/var/opt/mssql/output/owner_search.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[PartyAddr]" | sed -e '2d' >> "/var/opt/mssql/output/party_addr.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[PartyName]" | sed -e '2d' >> "/var/opt/mssql/output/party_name.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Permit]" | sed -e '2d' >> "/var/opt/mssql/output/permit.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Property]" | sed -e '2d' >> "/var/opt/mssql/output/property.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Res]" | sed -e '2d' >> "/var/opt/mssql/output/res.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[ResAddn]" | sed -e '2d' >> "/var/opt/mssql/output/res_addn.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[ResOthFeat]" | sed -e '2d' >> "/var/opt/mssql/output/res_oth_feat.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Rsn_Code]" | sed -e '2d' >> "/var/opt/mssql/output/resn_code.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[SystemInfo]" | sed -e '2d' >> "/var/opt/mssql/output/system_info.csv" 
+        /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[WaterRight]" | sed -e '2d' >> "/var/opt/mssql/output/water_right.csv" 
+
+        echo "All scripts have been executed. Waiting for MS SQL(pid $$pid) to terminate."
+
+        wait $$pid
