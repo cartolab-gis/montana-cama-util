@@ -4,8 +4,6 @@
 
 This utility requires docker and docker-compose.
 
-### <inline style="color:red">**_WARNING_**: </inline>The zipped STATE-WIDE file is >1.5GB and the unzipped Output.mdf is >9GB so be sure that your disk has plenty of free space. The total file size taken by the .mdf file and the output CSVs is >16GB.
-
 ### Linux
 
 Follow directions found at https://docs.docker.com/compose/install/linux/ for your distribution.
@@ -16,7 +14,9 @@ https://docs.docker.com/desktop/setup/install/mac-install/
 
 ## Usage
 
-Download and extract Output.mdf from the zipped file found at http://ftpgeoinfo.msl.mt.gov/Data/Spatial/MSDI/Cadastral/ORION_SQLDatabases/STATE-WIDE.ZIP (see warning in Requirements above.)
+### <inline style="color:red">**_WARNING_**: </inline>The zipped STATE-WIDE file is >1.5GB and the unzipped Output.mdf is >9GB so be sure that your disk has plenty of free space. The total file size taken by the .mdf file and the output CSVs is >16GB.
+
+Download and extract Output.mdf from the zipped file found at http://ftpgeoinfo.msl.mt.gov/Data/Spatial/MSDI/Cadastral/ORION_SQLDatabases/STATE-WIDE.ZIP (see warning above.)
 
 Once the file has been extracted to the MDF directory, from the root directory where docker-compose.yaml is located, run:
 
