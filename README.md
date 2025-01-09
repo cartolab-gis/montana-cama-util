@@ -1,5 +1,9 @@
 # Montana CAMA Database Extraction
 
+## Sponsored by:
+
+<a href="https://regrid.com/"><img src="./public/regrid_RT_green.svg" width="400" alt="Regrid Logo"></a>
+
 ## Requirements
 
 This utility requires docker and docker-compose.
@@ -34,6 +38,8 @@ All scripts have been executed. Waiting for MS SQL(pid ) to terminate.
 ```
 
 While the container is still running, you can connect to the database using SSMS with the user `sa` and password `LocalPassword123!`.
+
+<span style="color:red">**_WARNING_**: </span> Do not use this database for anything other than checking and exploring the data.
 
 And you can close the utility with Ctrl-C. Finally,
 
