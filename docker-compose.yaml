@@ -49,6 +49,8 @@ services:
           do /opt/mssql-tools18/bin/sqlcmd -C -U sa -P LocalPassword123! -l 30 -e -i $$foo
         done
 
+        echo "Creating CSV Files"
+
         /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[AgForest]" | sed -e '2d' >> "/var/opt/mssql/output/ag_forest.csv" 
         /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Appeal]" | sed -e '2d' >> "/var/opt/mssql/output/appeal.csv" 
         /opt/mssql-tools18/bin/sqlcmd -C -S localhost -d montana_cama -U sa -P LocalPassword123! -s "," -W -Q "SET NOCOUNT ON; SELECT * FROM [dbo].[Assessment]" | sed -e '2d' >> "/var/opt/mssql/output/assessment.csv" 
