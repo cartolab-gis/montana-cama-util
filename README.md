@@ -1,6 +1,8 @@
 # Montana CAMA Database Extraction
 
-## Sponsored by:
+This utility is used to transform Montana's Statewide Parcel Information that they release as a database backup file (.mdf) into more easily usable and formatted CSV files.
+
+## Graciously Sponsored by:
 
 <a href="https://regrid.com/"><img src="./public/regrid_RT_green.svg" width="400" alt="Regrid Logo"></a>
 
